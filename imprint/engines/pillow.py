@@ -4,7 +4,6 @@ from PIL import Image, ImageDraw, ImageFont
 from dataclasses import dataclass
 from .repository import Engine
 from ..components import Text, Img
-from ..file import File
 
 @dataclass
 class CtxPillow:
@@ -14,11 +13,10 @@ class CtxPillow:
 
 class PillowMotor(Engine):
 
-    def __init__(self, exit_file_model=False):
-        self.exit_file_model = exit_file_model
-        
     def new_page(self, options):
         if not options.background:
+            if not options.width or not options.height:
+                raise Exception(f"Defina a largura e altura para", options.name)
             # background personalizado (SEM IMAGEM)
             img = Image.new("RGBA",
                 (options.width, options.height),
@@ -27,39 +25,44 @@ class PillowMotor(Engine):
         else:
             # background com imagem
             img = Image.open(options.background)
-
+            w, h = img.size
+            if options.width:
+                w = options.width
+            if options.height:
+                h = options.height
+            img = img.resize((w, h))
         return CtxPillow(img, ImageDraw.Draw(img), desc=options.name)
-    
-    def save_page(self, page: CtxPillow):
-        if self.exit_file_model:
-            with io.BytesIO() as buffer:
-                page.img.convert("RGB").save(buffer, format="JPEG", quality=100)
-                buffer.seek(0)
-                byts = buffer.read()
-            return File(
-                file_name=f"{page.desc}.jpeg",
-                file_content=byts,
-                file_length=len(byts)
-            )
-        return page.img
-    
+
     def make_component(self, page: CtxPillow, component):
         if isinstance(component, Text):
-            font = ImageFont.load_default(size=component.size)
+            # definir fonte
+            font = component.get_font()
+            if font:
+                font = ImageFont.truetype(font, size=component.get_size())
+            else:
+                font = ImageFont.load_default(size=component.get_size())
+
             value = component.get_value()
-            x, y = component.position
-            if component.dimension_r:
+            x, y = component.get_position()
+            
+            if component.get_dimension_r():
                 text_size = page.draw.textlength(value, font)
-                x = (x + component.dimension_r - text_size) // 2
+                x = (x + component.get_dimension_r() - text_size) // 2
 
             page.draw.text(
                 (x, y), # Position
                 value, # Texto
-                fill=component.color, # Color
+                fill=component.get_color(), # Color
                 font=font # Font
             )
             
         elif isinstance(component, Img):
-            img = Image.open(component.get_value())
-            img = img.resize(component.dimension, Image.LANCZOS)
-            page.img.paste(img, component.position)
+            path = component.get_path()
+            if not path:
+                raise Exception("O caminho da imagem não foi denifido!")
+            img = Image.open(path)
+            img = img.resize(component.get_dimension(), Image.LANCZOS)
+            page.img.paste(img, component.get_position())
+
+    def get_instance(self, page: CtxPillow):
+        return page.img

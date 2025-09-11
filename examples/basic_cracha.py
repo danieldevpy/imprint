@@ -1,28 +1,28 @@
 from imprint import Model
 import os
 
-example_photo = os.path.join(os.getcwd(), "examples/assets/photo.png")
+def create_basic_badge():
+    background_path = os.path.join(os.getcwd(), "examples/assets/badge.png")
 
-def basic_cracha():
-    cracha = Model.new(
-        name="Modelo-Cracha-Basico"
-    )
-    page_front = cracha.new_page(name="front")
-    # Criando a pagina da frente do modelo
-    page_front.set_size(500, 500)
-    img_path = os.path.join(os.getcwd(), "examples/assets/cracha.png")
-    page_front.set_background(img_path)
-    # Criando campo de texto para nome
-    field_full_name = page_front.add_field(name="Full Name", component="text")
-    field_full_name.set_position((520, 320))
-    # Criando campo de texto para job
-    field_job = page_front.add_field(name="Cargo", component="text")
-    field_job.set_position((510, 400))
-    # Criando campo de texto para nivel de acesso
-    field_acess = page_front.add_field(name="Role", component="text")
-    field_acess.set_position((610, 480))
-    # Criando campo de imagem para foto
-    field_photo = page_front.add_field(name="Photo", component="img")
-    field_photo.set_position((35, 245))
-    field_photo.set_dimesion((360, 360))
-    return cracha
+    model = Model.new(name="Basic-Badge")
+
+    front_page = model.new_page(name="front")
+    front_page.set_background(background_path)
+
+    full_name_field = front_page.add_component(name="Full Name", component="text", form_key="name")
+    full_name_field.set_position((520, 320))
+    full_name_field.set_size(24)
+
+    job_field = front_page.add_component(name="Job", component="text", form_key="job")
+    job_field.set_position((510, 400))
+    job_field.set_size(24)
+
+    role_field = front_page.add_component(name="Role", component="text", form_key="role")
+    role_field.set_position((610, 480))
+    role_field.set_size(24)
+
+    photo_field = front_page.add_component(name="Photo", component="img", form_key="photo")
+    photo_field.set_position((35, 245))
+    photo_field.set_dimension((360, 360))
+
+    return model

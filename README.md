@@ -1,85 +1,117 @@
 # Imprint
 
-**Imprint** é uma biblioteca Python para criar e gerar modelos de documentos visuais, como certificados, crachás, convites e outros templates gráficos, de forma simples e programática. Ela permite preencher campos dinâmicos a partir de APIs, arquivos Excel, banco de dados ou qualquer fonte de dados.
+**Imprint** is a Python library for creating and generating visual document templates, such as certificates, badges, invitations, and other graphic templates, in a simple and programmatic way. It allows dynamic fields to be filled from APIs, Excel files, databases, or any data source.
 
 ---
 
-## ⚡ Recursos
+## ⚡ Features
 
-- Criação de **modelos** personalizados com múltiplas páginas.
-- Adição de **campos dinâmicos**: textos, imagens e QR codes.
-- Definição de **tamanho e posição** de campos em cada página.
-- Exportação de modelos para **imagens PNG** ou outros formatos.
-- Integração fácil com **APIs, Excel e bancos de dados**.
-- Estrutura modular para extensões futuras (novos tipos de campos e efeitos gráficos).
-
----
-
-## 🚀 Instalação
-
-Você pode instalar diretamente do repositório (quando disponível no PyPI, basta substituir `git+...` por `pip install imprint`):
-
-pip install git+https://github.com/seu-usuario/imprint.git
+* Create **custom templates** with multiple pages.
+* Add **dynamic fields**: text, images, and QR codes.
+* Define **size and position** for each field on a page.
+* Export templates as **PNG images** or other formats.
+* Easy integration with **APIs, Excel, and databases**.
+* Modular structure for future extensions (new field types and graphical effects).
 
 ---
 
-## 📝 Exemplo de uso básico
+## 🚀 Installation
+
+You can install directly from the repository (when available on PyPI, just replace `git+...` with `pip install imprint`):
+
+```bash
+pip install git+https://github.com/your-username/imprint.git
+```
+
+---
+
+## 📝 Basic Usage Example
 
 ```python
+import os
 from imprint import Model
 
-def basic_model():
-    model = Model.new(name="Modelo-Cracha-Basico")
-    first_page = model.new_page(name="Frente")
-    first_page.set_size(500, 500)
-    first_page.set_background("/caminho/para/imagem.png")
-    
-    name = first_page.add_field(name="Nome Completo", component="text")
-    name.set_position((140, 140))
-    
-    job = first_page.add_field(name="Cargo", component="text")
-    job.set_position((150, 150))
-    
+def create_basic_badge():
+    background_path = os.path.join(os.getcwd(), "examples/assets/badge.png")
+
+    model = Model.new(name="Basic-Badge")
+
+    front_page = model.new_page(name="front")
+    front_page.set_background(background_path)
+
+    full_name_field = front_page.add_component(name="Full Name", component="text", form_key="name")
+    full_name_field.set_position((520, 320))
+    full_name_field.set_size(24)
+
+    job_field = front_page.add_component(name="Job", component="text", form_key="job")
+    job_field.set_position((510, 400))
+    job_field.set_size(24)
+
+    role_field = front_page.add_component(name="Role", component="text", form_key="role")
+    role_field.set_position((610, 480))
+    role_field.set_size(24)
+
+    photo_field = front_page.add_component(name="Photo", component="img", form_key="photo")
+    photo_field.set_position((35, 245))
+    photo_field.set_dimension((360, 360))
+
     return model
 
-# Uso do modelo
-model = basic_model()
-pages = model.to_png({
-    "Nome Completo": "Daniel Fernandes Pereira", 
-    "Cargo": "TI"
-})
+model = create_basic_badge()
+
+form_data = {
+    "name": "Daniel Fernandes Pereira",
+    "job": "Software Developer",
+    "role": "Administrator",
+    "photo": os.path.join(os.getcwd(), "examples/assets/photo.png")
+}
+
+result = model.build(form_data).make_images()
+# to view
+result.show()
+# to save
+result.save("result.png", format="PNG")
+
+
+
+# Multiple pages example
+results = model.build(form_data).make_images()
+for i, page in enumerate(results):
+    page.save(f"result-{i}.png", format="PNG")
 ```
----
-
-## 🔧 Estrutura do modelo
-
-- **Model**: representa o documento completo, contendo múltiplas páginas.
-- **Page**: representa cada página do modelo.
-- **Field**: representa os campos dinâmicos que podem ser preenchidos (texto, imagem, QR code, etc.).
-- **Components**: conjunto de tipos de campos disponíveis.
 
 ---
 
-## 🌟 Próximos recursos planejados
+## 🔧 Model Structure
 
-- Suporte a **camadas e efeitos visuais**.
-- Exportação em **PDF** diretamente.
-- Integração com **planilhas Excel** e arquivos CSV.
-- Suporte a **QR codes dinâmicos** e códigos de barras.
-- Templates compartilháveis via **API**.
+* **Model**: represents the complete document, containing multiple pages.
+* **Page**: represents each page of the template.
+* **Field**: represents dynamic fields that can be filled (text, image, QR code, etc.).
+* **Components**: set of available field types.
 
 ---
 
-## 💡 Contribuindo
+## 🌟 Upcoming Features
 
-Contribuições são bem-vindas! Siga os passos abaixo:
+* Support for **layers and visual effects**.
+* Direct **PDF export**.
+* Integration with **Excel and CSV files**.
+* Support for **dynamic QR codes** and barcodes.
+* Shareable templates via **API**.
 
-1. **Faça um fork** do projeto
-2. **Crie uma branch** para sua feature:
-   ```bash
-   git checkout -b feature/nova-funcionalidade
 ---
 
-## 📄 Licença
+## 💡 Contributing
+
+1. **Fork** the project.
+2. **Create a branch** for your feature:
+
+```bash
+git checkout -b feature/new-feature
+```
+
+---
+
+## 📄 License
 
 MIT License © Daniel Fernandes

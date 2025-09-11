@@ -5,4 +5,4 @@ def test_model():
     model = Model.new("new model")
     assert isinstance(model, Model)
     assert model.name == "new model"
-    assert len(model.pages) == 0
+    assert len(model._pages) == 0
