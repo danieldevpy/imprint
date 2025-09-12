@@ -1,4 +1,5 @@
-from imprint import Model, Text, Img
+from imprint import Model
+from imprint.components import Text, Img
 
 def test_component_text():
     # Criando o Modelo de Cracha Basico

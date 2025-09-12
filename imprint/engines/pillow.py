@@ -1,9 +1,10 @@
 
-import io
+from typing import List, Any
 from PIL import Image, ImageDraw, ImageFont
 from dataclasses import dataclass
 from .repository import Engine
 from ..components import Text, Img
+from ..build_results import ImageBuildResult
 
 @dataclass
 class CtxPillow:
@@ -66,3 +67,6 @@ class PillowMotor(Engine):
 
     def get_instance(self, page: CtxPillow):
         return page.img
+    
+    def build_result(self, instances: List[Image.Image]):
+        return ImageBuildResult(instances)

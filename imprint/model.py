@@ -1,10 +1,9 @@
 from pydantic import BaseModel
-from typing import Dict, Optional, Any, Union, List
+from typing import Dict, Optional, Any,List
 from .page import Page, PageOptions
 from .engines.pillow import PillowMotor
 from .engines.repository import Engine
-from dataclasses import dataclass, field
-from PIL.Image import Image
+from .build_results import BuildResultBase
 
 
 class Model(BaseModel):
@@ -35,43 +34,53 @@ class Model(BaseModel):
 
     def get_form(self) -> Dict:
         form = {}
-        for page in self._pages:
-            for field in page.fields:
-                form[field.name] = ""
+        pages = list(self._pages.values())
+        for page in pages:
+            for field in getattr(page, "_fields", {}).values():
+                form[field.form_key] = ""
+        return form
+    
+    def get_schema(self) -> Dict:
+        form = {}
+        for page_name, page in self._pages.items():
+            form[page_name] = {}
+            for field in getattr(page, "_fields", {}).values():
+                form[page_name][field.form_key] = ""
         return form
     
     def build(self, form: Dict):
         return Builder(self, form)
 
 
-@dataclass
+
 class Builder:
-    _model: Model
-    _form: Dict[str, Any]
-    _engine: Optional[Engine] = field(default_factory=PillowMotor)
+    def __init__(self, model: Model, form, engine: Optional[Engine] = None):
+        self._model = model
+        self._form = form
+        self._engine = engine or PillowMotor()
 
-    def _build(self):
-        _instances = []
-        if len(self._model._pages.keys()) < 1:
-            raise Exception("Nenhuma página criada!")
-        for _, page in self._model._pages.items():
-            # Criar uma nova página
-            ctx_page = self._engine.new_page(page.options)
-            for _, field in page._fields.items():
-                # Obtém o valor do formulário
-                if field.form_key:
-                    field_value = self._form.get(field.form_key)
-                    field.component.set_value(field_value)
-                self._engine.make_component(ctx_page, field.component)
-            _instances.append(self._engine.get_instance(ctx_page))
-        return _instances
+    def _build(self) -> List[Any]:
+        instances = []
+        pages = list(self._model._pages.values())
+        if not pages:
+            raise RuntimeError("Nenhuma página criada")
+        for page in pages:
+            ctx = self._engine.new_page(page.options)
+            # iterar campos...
+            for field in getattr(page, "_fields", {}).values():
+                if getattr(field, "form_key", None):
+                    field.component.set_value(self._form.get(field.form_key))
+                self._engine.make_component(ctx, field.component)
+            instances.append(self._engine.get_instance(ctx))
+        return instances
 
-    def make_images(self, transparent=False) -> Union[Image, List[Image]]:
-        if not isinstance(self._engine, PillowMotor):
-            self._engine = PillowMotor()
-        pages = self._build()
-        if not transparent:
-            pages = [page.convert("RGB") for page in pages]
-        if len(pages) == 1:
-            return pages[0]
-        return pages
+    def render(self) -> BuildResultBase:
+        instances = self._build()
+        # delega ao engine para encapsular no BuildResult adequado
+        result = self._engine.build_result(instances)
+        return result
+
+    # aliases
+    def make_images(self, transparent: bool = False):
+        # compat layer: if engine is PillowMotor, user expects image behavior
+        return self.render()

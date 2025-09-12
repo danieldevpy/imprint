@@ -1,4 +1,5 @@
-from imprint import Model, Page
+from imprint import Model
+from imprint.page import Page
 
 def test_page():
     # Criando o Modelo de Cracha Basico
