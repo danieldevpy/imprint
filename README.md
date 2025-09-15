@@ -74,7 +74,7 @@ dados_formulario = {
     "nome": "Daniel Fernandes Pereira",
     "cargo": "Desenvolvedor de Software",
     "funcao": "Administrador",
-    "foto": os.path.join(os.getcwd(), "examples/assets/photo.png"),
+    "foto": os.path.join(os.getcwd(), "examples/assets/photo.jpeg"),
 }
 
 # Construir e renderizar
@@ -210,7 +210,7 @@ form_data = {
     "name": "Daniel Fernandes Pereira",
     "job": "Software Developer",
     "role": "Administrator",
-    "photo": os.path.join(os.getcwd(), "examples/assets/photo.png")
+    "photo": os.path.join(os.getcwd(), "examples/assets/photo.jpeg")
 }
 
 # Build and render (Pillow engine by default)
