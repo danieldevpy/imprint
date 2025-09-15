@@ -1,119 +1,169 @@
-from pydantic import BaseModel, field_validator
-from typing import Any, Tuple, Optional, Union, Dict, Callable
-
+from pydantic import BaseModel
+from typing import Tuple, Optional, Union, Dict, Callable
 
 class Img(BaseModel):
-    _position: Optional[Tuple[int, int]] = (0, 0)
-    _dimension: Optional[Tuple[int, int]] = (100, 100)
-    _path: Optional[Optional[str]] = None
+    """
+    Represents an image component that can be placed on a page.
 
+    Attributes:
+        position (Tuple[int, int]): Top-left coordinates of the image (x, y). Default is (0, 0).
+        dimension (Tuple[int, int]): Width and height of the image. Default is (100, 100).
+        path (Optional[str]): File path of the image. Default is None.
+    """
+
+    position: Tuple[int, int] = (0, 0)
+    dimension: Tuple[int, int] = (100, 100)
+    path: Optional[str] = None
+
+    # Getters
     def get_position(self) -> Tuple[int, int]:
-        return self._position
-
-    def set_position(self, value: Tuple[int, int]):
-        if not isinstance(value, tuple) or len(value) != 2:
-            raise ValueError("position deve ser uma tupla (x, y)")
-        if not all(isinstance(v, int) for v in value):
-            raise ValueError("position deve conter apenas inteiros")
-        self._position = value
-        return self  # permite encadeamento (fluent API)
+        """Return the (x, y) position of the image."""
+        return self.position
 
     def get_dimension(self) -> Tuple[int, int]:
-        return self._dimension
-
-    def set_dimension(self, value: Tuple[int, int]):
-        if not isinstance(value, tuple) or len(value) != 2:
-            raise ValueError("dimension deve ser uma tupla (largura, altura)")
-        if not all(isinstance(v, int) and v >= 0 for v in value):
-            raise ValueError("dimension deve conter apenas inteiros >= 0")
-        self._dimension = value
-        return self
+        """Return the (width, height) of the image."""
+        return self.dimension
 
     def get_path(self) -> Optional[str]:
-        return self._path
+        """Return the file path of the image."""
+        return self.path
+
+    # Setters
+    def set_position(self, value: Tuple[int, int]):
+        """Set the position (x, y) of the image."""
+        if not isinstance(value, tuple) or len(value) != 2:
+            raise ValueError("position must be a tuple (x, y)")
+        if not all(isinstance(v, int) for v in value):
+            raise ValueError("position values must be integers")
+        self.position = value
+        return self
+
+    def set_dimension(self, value: Tuple[int, int]):
+        """Set the dimension (width, height) of the image."""
+        if not isinstance(value, tuple) or len(value) != 2:
+            raise ValueError("dimension must be a tuple (width, height)")
+        if not all(isinstance(v, int) and v >= 0 for v in value):
+            raise ValueError("dimension values must be non-negative integers")
+        self.dimension = value
+        return self
 
     def set_path(self, value: Optional[str]):
-        self._path = value
+        """Set the file path of the image."""
+        self.path = value
         return self
 
     def set_value(self, value: Optional[str]):
-        self._path = value
+        """Alias for `set_path`; sets the image file path."""
+        self.path = value
         return self
+
 
 class Text(BaseModel):
-    _color: Optional[Tuple[int, int, int]] = (0, 0, 0)
-    _size: Optional[int] = 12
-    _position: Optional[Tuple[int, int]] = (0, 0)
-    _value: Optional[str] = ""
-    _dimension_r: Optional[int] = 0
-    _font: Optional[Union[str, None]] = None
+    """
+    Represents a text component that can be placed on a page.
 
+    Attributes:
+        color (Tuple[int, int, int]): RGB color of the text. Default is black (0, 0, 0).
+        size (int): Font size of the text. Default is 12.
+        position (Tuple[int, int]): Top-left coordinates of the text (x, y). Default is (0, 0).
+        value (str): Text content. Default is empty string.
+        dimension_r (int): Optional width for right-alignment or centering. Default is 0.
+        font (Optional[str]): File path to a TrueType font. Default is None.
+    """
+
+    color: Tuple[int, int, int] = (0, 0, 0)
+    size: int = 12
+    position: Tuple[int, int] = (0, 0)
+    value: str = ""
+    dimension_r: int = 0
+    font: Optional[str] = None
+
+    # Getters
     def get_color(self) -> Tuple[int, int, int]:
-        return self._color
-
-    def set_color(self, value: Tuple[int, int, int]):
-        if not isinstance(value, tuple) or len(value) != 3:
-            raise ValueError("color deve ser uma tupla (R, G, B)")
-        if any(not (0 <= c <= 255) for c in value):
-            raise ValueError("Cada componente da cor deve estar entre 0 e 255")
-        self._color = value
-        return self
+        return self.color
 
     def get_size(self) -> int:
-        return self._size
+        return self.size
+
+    def get_position(self) -> Tuple[int, int]:
+        return self.position
+
+    def get_value(self) -> str:
+        return self.value
+
+    def get_dimension_r(self) -> int:
+        return self.dimension_r
+
+    def get_font(self) -> Optional[str]:
+        return self.font
+
+    # Setters
+    def set_color(self, value: Tuple[int, int, int]):
+        if not isinstance(value, tuple) or len(value) != 3:
+            raise ValueError("color must be a tuple (R, G, B)")
+        if any(not (0 <= c <= 255) for c in value):
+            raise ValueError("each color component must be between 0 and 255")
+        self.color = value
+        return self
 
     def set_size(self, value: int):
         if not isinstance(value, int) or value <= 0:
-            raise ValueError("size deve ser um inteiro positivo")
-        self._size = value
+            raise ValueError("size must be a positive integer")
+        self.size = value
         return self
-
-    def get_position(self) -> Tuple[int, int]:
-        return self._position
 
     def set_position(self, value: Tuple[int, int]):
         if not isinstance(value, tuple) or len(value) != 2:
-            raise ValueError("position deve ser uma tupla (x, y)")
+            raise ValueError("position must be a tuple (x, y)")
         if not all(isinstance(v, int) for v in value):
-            raise ValueError("position deve conter apenas inteiros")
-        self._position = value
+            raise ValueError("position values must be integers")
+        self.position = value
         return self
-
-    def get_value(self) -> Optional[str]:
-        return self._value
 
     def set_value(self, text: Optional[str]):
         if text is not None and not isinstance(text, str):
-            raise ValueError("value deve ser uma string ou None")
-        self._value = text
+            raise ValueError("value must be a string or None")
+        self.value = text
         return self
-
-    def get_dimension_r(self) -> int:
-        return self._dimension_r
 
     def set_dimension_r(self, value: int):
         if not isinstance(value, int) or value < 0:
-            raise ValueError("dimension_r deve ser um inteiro >= 0")
-        self._dimension_r = value
+            raise ValueError("dimension_r must be an integer >= 0")
+        self.dimension_r = value
         return self
 
-    def get_font(self):
-        return self._font
-    
     def set_font(self, path: str):
-        self._font = path
+        self.font = path
         return self
+
 
 COMPONENTS = Union[Text, Img]
+"""
+Type alias for supported components. Can be either Text or Img.
+"""
 
-# mapeamento de fábricas
 MAPPING_COMPONENTS: Dict[str, Callable[[], COMPONENTS]] = {
     "text": lambda: Text(),
     "img": lambda: Img(),
 }
+"""
+Mapping from string component names to their factory functions.
+"""
 
 def get_component(name: str) -> COMPONENTS:
+    """
+    Factory function to create a new component instance by name.
+
+    Args:
+        name (str): Name of the component ("text" or "img").
+
+    Returns:
+        COMPONENTS: A new instance of the requested component.
+
+    Raises:
+        ValueError: If the component name is not found.
+    """
     factory = MAPPING_COMPONENTS.get(name)
     if not factory:
-        raise ValueError(f"Componente '{name}' não encontrado")
+        raise ValueError(f"Component '{name}' not found")
     return factory()

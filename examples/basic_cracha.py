@@ -2,27 +2,34 @@ from imprint import Model
 import os
 
 def create_basic_badge():
-    background_path = os.path.join(os.getcwd(), "examples/assets/badge.png")
-
+    # Getting background image path
+    background_path = os.path.join(os.getcwd(), "examples/assets/badge.jpeg")
+    
+    # Creating basic model
     model = Model.new(name="Basic-Badge")
 
-    front_page = model.new_page(name="front")
-    front_page.set_background(background_path)
+    # Creating front page
+    front_page = model.new_page(name="front")\
+        .set_background(background_path)
 
-    full_name_field = front_page.add_component(name="Full Name", component="text", form_key="name")
-    full_name_field.set_position((520, 320))
-    full_name_field.set_size(24)
+    # Adding text field: name
+    front_page.add_component(name="Full Name", component="text", form_key="name")\
+        .set_position((520, 320))\
+        .set_size(24)  # defining component properties
 
-    job_field = front_page.add_component(name="Job", component="text", form_key="job")
-    job_field.set_position((510, 400))
-    job_field.set_size(24)
+    # Adding text field: job
+    front_page.add_component(name="Job", component="text", form_key="job")\
+        .set_position((510, 400))\
+        .set_size(24)  # defining component properties
 
-    role_field = front_page.add_component(name="Role", component="text", form_key="role")
-    role_field.set_position((610, 480))
-    role_field.set_size(24)
+    # Adding text field: role
+    front_page.add_component(name="Role", component="text", form_key="role")\
+        .set_position((610, 480))\
+        .set_size(24)  # defining component properties
 
-    photo_field = front_page.add_component(name="Photo", component="img", form_key="photo")
-    photo_field.set_position((35, 245))
-    photo_field.set_dimension((360, 360))
+    # Adding image field: photo
+    front_page.add_component(name="Photo", component="img", form_key="photo")\
+        .set_position((35, 245))\
+        .set_dimension((360, 360))  # defining component properties
 
     return model

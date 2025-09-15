@@ -41,39 +41,32 @@ from imprint import Model
 
 # Cria um modelo simples com uma página e campos dinâmicos
 def criar_cracha_basico():
-    caminho_fundo = os.path.join(os.getcwd(), "examples/assets/badge.png")
+    # caminho do fundo
+    caminho_fundo = os.path.join(os.getcwd(), "examples/assets/badge.jpeg")
 
+    # cria modelo
     modelo = Model.new(name="Cracha-Basico")
 
-    pagina_frente = modelo.new_page(name="frente")
-    pagina_frente.set_background(caminho_fundo)
+    # cria página da frente
+    pagina_frente = modelo.new_page(name="frente").set_background(caminho_fundo)
 
-    campo_nome = pagina_frente.add_component(
-        name="Nome Completo", component="text", form_key="nome"
-    )
-    campo_nome.set_position((520, 320))
-    campo_nome.set_size(24)
+    # adiciona campo de texto: nome
+    pagina_frente.add_component(name="Nome Completo", component="text", form_key="nome")\
+        .set_position((520, 320)).set_size(24)
 
-    campo_cargo = pagina_frente.add_component(
-        name="Cargo", component="text", form_key="cargo"
-    )
-    campo_cargo.set_position((510, 400))
-    campo_cargo.set_size(24)
+    # adiciona campo de texto: cargo
+    pagina_frente.add_component(name="Cargo", component="text", form_key="cargo")\
+        .set_position((510, 400)).set_size(24)
 
-    campo_funcao = pagina_frente.add_component(
-        name="Função", component="text", form_key="funcao"
-    )
-    campo_funcao.set_position((610, 480))
-    campo_funcao.set_size(24)
+    # adiciona campo de texto: função
+    pagina_frente.add_component(name="Função", component="text", form_key="funcao")\
+        .set_position((610, 480)).set_size(24)
 
-    campo_foto = pagina_frente.add_component(
-        name="Foto", component="img", form_key="foto"
-    )
-    campo_foto.set_position((35, 245))
-    campo_foto.set_dimension((360, 360))
+    # adiciona campo de imagem: foto
+    pagina_frente.add_component(name="Foto", component="img", form_key="foto")\
+        .set_position((35, 245)).set_dimension((360, 360))
 
     return modelo
-
 
 modelo = criar_cracha_basico()
 
@@ -84,59 +77,49 @@ dados_formulario = {
     "foto": os.path.join(os.getcwd(), "examples/assets/photo.png"),
 }
 
-# Construir e renderizar (com o engine Pillow por padrão)
-resultado = modelo.build(dados_formulario).render()
+# Construir e renderizar
+resultado = modelo.build_img(dados_formulario)
 
 # Visualizar no visualizador padrão do sistema
 resultado.show()
-
-# Salvar saída (um arquivo, múltiplas páginas ou diretório)
-# - Para uma única página:
-resultado.save("out/cracha.png")
-# - Para múltiplas páginas: cria diretório com páginas PNG ou salva PDF se especificado
-resultado.save("out/")
-
 ```
-
-### Exemplo obtendo campos do formulário
-```python
-from examples.cracha_basico import criar_cracha_basico
-
-modelo = criar_cracha_basico()
-print(modelo.get_form())
-print(modelo.get_schema())
-
-```
-> {'name': '', 'job': '', 'role': '', 'photo': ''}
-
-> {'front': {'name': '', 'job': '', 'role': '', 'photo': ''}}
-
 
 > Observações:
 >
 > * `Model.new(...)` cria um novo template.
 > * `Page` aceita background por caminho de arquivo; caso não use imagem, especifique `width` e `height`.
-> * `form_key` associa o componente a uma chave no dicionário `form_data` passado ao `build()`.
+> * `form_key` associa o componente a uma chave no dicionário `form_data` passado ao `build_...()`.
 
 ### 🔧 Estrutura da API (resumo)
 
-* `Model.new(name: str)` → cria um novo `Model`.
-* `Model.new_page(name: str)` → cria e retorna um `Page` ligado ao `Model`.
-* `Page.set_background(path_or_none)` → define background (imagem) ou limpa para fundo colorido.
-* `Page.add_component(name, component: str, form_key: Optional[str])` → adiciona componente ("text", "img", "qrcode", ...).
-* `Model.build(form: dict)` → retorna um `Builder` pronto para render.
-* `Builder.render()` → retorna um `BuildResult` (ex.: `ImageBuildResult`).
-* `BuildResult.show()` → abre o resultado no visualizador do sistema.
-* `BuildResult.save(path)` → salva como PNG(s) ou PDF (dependendo do engine e do caminho).
+### Model | Modelo
+* `Model.new(name: str)` → Cria uma nova instância de `Model` com o nome fornecido.
+* `Model.new_page(name: str)` → Cria uma nova `Page` e a vincula ao `Model` pai.
+* `Model.get_form()` → Retorna um único dicionário combinando todos os forms de todas as páginas.
+* `Model.get_schema()` → Retorna um dicionário com nomes das páginas como chaves e seus forms como valores.
+* `Model.export(path: str)` → Salva a estrutura do model em um arquivo JSON.
+* `Model.load(path: str)` → Método de classe para carregar um model de um arquivo JSON.
 
-### 📦 Formatos e engines
+### Page | Pagina
+* `Page.add_component(name: str, component: str, form_key: Optional[str])` → Adiciona um componente (Text ou Img) à página.
+* `Page.get_component(name: str)` → Retorna o componente associado ao nome do campo.
+* `Page.set_width(width: int)` → Define a largura da página.
+* `Page.set_height(height: int)` → Define a altura da página.
+* `Page.set_dimension(width: int, height: int)` → Define largura e altura.
+* `Page.set_background(background: Union[str, Tuple[int,int,int]])` → Define a imagem ou cor de fundo.
 
-* Atualmente a engine padrão é **Pillow** e produz `ImageBuildResult` (PIL.Image objects).
-* Planos futuros: engines adicionais (PDF nativo, SVG, HTML/CSS).
+### Component | Componente
+* `Text` → Representa componentes de texto. Métodos: `get_color()`, `get_size()`, `get_position()`, `get_value()`, `get_dimension_r()`, `get_font()`, `set_color()`, `set_size()`, `set_position()`, `set_value()`, `set_dimension_r()`, `set_font()`
+* `Img` → Representa componentes de imagem. Métodos: `get_position()`, `get_dimension()`, `get_path()`, `set_position()`, `set_dimension()`, `set_path()`, `set_value()`
+
+### Builder / Renderização
+
+* `BuilderMixin.build_img(forms)` → Retorna um `ImageBuild` com as imagens renderizadas.
+* Métodos: `to_images()`, `to_image()`, `to_bytes(page: Optional[int])`, `save(path: str)`, `show(page: Optional[int])`
 
 ### 📌 Boas práticas e dicas
 
-* Use `Field`/`Component` com `form_key` para ligar os campos ao seu dicionário de dados.
+* Use `Component` com `form_key` para ligar os campos ao seu dicionário de dados.
 * Para imagens, sempre passe caminhos de arquivo válidos ou URIs locais; cuide do tamanho e proporção.
 * Ao usar fundo sem imagem, defina `width` e `height` na página para evitar erro.
 
@@ -189,28 +172,35 @@ from imprint import Model
 
 # Build a simple badge template with dynamic fields
 def create_basic_badge():
-    background_path = os.path.join(os.getcwd(), "examples/assets/badge.png")
-
+    # Getting background image path
+    background_path = os.path.join(os.getcwd(), "examples/assets/badge.jpeg")
+    
+    # Creating basic model
     model = Model.new(name="Basic-Badge")
 
-    front_page = model.new_page(name="front")
-    front_page.set_background(background_path)
+    # Creating front page
+    front_page = model.new_page(name="front")\
+        .set_background(background_path)
 
-    full_name_field = front_page.add_component(name="Full Name", component="text", form_key="name")
-    full_name_field.set_position((520, 320))
-    full_name_field.set_size(24)
+    # Adding text field: name
+    front_page.add_component(name="Full Name", component="text", form_key="name")\
+        .set_position((520, 320))\
+        .set_size(24)  # defining component properties
 
-    job_field = front_page.add_component(name="Job", component="text", form_key="job")
-    job_field.set_position((510, 400))
-    job_field.set_size(24)
+    # Adding text field: job
+    front_page.add_component(name="Job", component="text", form_key="job")\
+        .set_position((510, 400))\
+        .set_size(24)  # defining component properties
 
-    role_field = front_page.add_component(name="Role", component="text", form_key="role")
-    role_field.set_position((610, 480))
-    role_field.set_size(24)
+    # Adding text field: role
+    front_page.add_component(name="Role", component="text", form_key="role")\
+        .set_position((610, 480))\
+        .set_size(24)  # defining component properties
 
-    photo_field = front_page.add_component(name="Photo", component="img", form_key="photo")
-    photo_field.set_position((35, 245))
-    photo_field.set_dimension((360, 360))
+    # Adding image field: photo
+    front_page.add_component(name="Photo", component="img", form_key="photo")\
+        .set_position((35, 245))\
+        .set_dimension((360, 360))  # defining component properties
 
     return model
 
@@ -226,57 +216,55 @@ form_data = {
 # Build and render (Pillow engine by default)
 result = model.build(form_data).render()
 
-# Show result using OS default viewer
+# Build and render
+result = model.build_img(form_data)
+
+# Display in the system's default viewer
 result.show()
-
-# Save output (single file, multiple pages or directory)
-result.save("out/badge.png")
-result.save("out/")
 ```
 
-### Example getting form fields
-```python
-from examples.basic_cracha import create_basic_badge
+### 🔧 API Structure (summary)
 
-model = create_basic_badge()
-print(model.get_form())
-print(model.get_schema())
+#### Model
 
-```
-> {'name': '', 'job': '', 'role': '', 'photo': ''}
+* `Model.new(name: str)` → Creates a new `Model` instance with the given name.
+* `Model.new_page(name: str)` → Creates a new `Page` and links it to the parent `Model`.
+* `Model.get_form()` → Returns a single dictionary combining all forms from all pages.
+* `Model.get_schema()` → Returns a dictionary with page names as keys and their forms as values.
+* `Model.export(path: str)` → Saves the model structure to a JSON file.
+* `Model.load(path: str)` → Class method to load a model from a JSON file.
 
-> {'front': {'name': '', 'job': '', 'role': '', 'photo': ''}}
+#### Page
 
-### 🔧 API Summary
+* `Page.add_component(name: str, component: str, form_key: Optional[str])` → Adds a component (Text or Img) to the page.
+* `Page.get_component(name: str)` → Returns the component associated with the field name.
+* `Page.set_width(width: int)` → Sets the page width.
+* `Page.set_height(height: int)` → Sets the page height.
+* `Page.set_dimension(width: int, height: int)` → Sets width and height.
+* `Page.set_background(background: Union[str, Tuple[int,int,int]])` → Sets the background image or color.
 
-* `Model.new(name: str)` — create a new `Model`.
-* `Model.new_page(name: str)` — create and attach a `Page` to the model.
-* `Page.set_background(path_or_none)` — set background image or use plain color background.
-* `Page.add_component(name, component, form_key=...)` — add a component ("text", "img", "qrcode").
-* `Model.build(form: dict)` — returns a `Builder` instance.
-* `Builder.render()` — returns a `BuildResult` (e.g., `ImageBuildResult`).
-* `BuildResult.show()` — open with the system viewer.
-* `BuildResult.save(path)` — save as PNG(s) or PDF depending on engine and path.
+#### Component
 
-### 📦 Engines & Output
+* `Text` → Represents text components. Methods: `get_color()`, `get_size()`, `get_position()`, `get_value()`, `get_dimension_r()`, `get_font()`, `set_color()`, `set_size()`, `set_position()`, `set_value()`, `set_dimension_r()`, `set_font()`
+* `Img` → Represents image components. Methods: `get_position()`, `get_dimension()`, `get_path()`, `set_position()`, `set_dimension()`, `set_path()`, `set_value()`
 
-* Default engine: **Pillow**, produces `ImageBuildResult` (PIL.Image objects).
-* Future engines planned: PDF native, SVG, HTML/CSS render.
+#### Builder / Rendering
 
-### 📌 Best Practices
+* `BuilderMixin.build_img(forms)` → Returns an `ImageBuild` with rendered images.
+* Methods: `to_images()`, `to_image()`, `to_bytes(page: Optional[int])`, `save(path: str)`, `show(page: Optional[int])`
 
-* Use `form_key` to map components to data keys in the form dictionary.
-* For images, pass valid file paths or local URIs; mind aspect ratios and sizes.
-* When not using an image background, specify `width` and `height` for the page.
+### 📌 Best Practices & Tips
 
-### 🌟 Contributing
+* Use `Component` with `form_key` to link fields to your data dictionary.
+* For images, always provide valid file paths or local URIs; handle size and proportion carefully.
+* When using a background without an image, set `width` and `height` on the page to avoid errors.
 
-1. Fork the repository.
-2. Create a branch: `git checkout -b feature/your-feature`.
-3. Open a PR with a clear description and tests/examples.
+### 🌟 Contributions
+
+1. Fork on GitHub.
+2. Create a branch: `git checkout -b feature/feature-name`.
+3. Open a PR with a clear description of your changes.
 
 ### 📄 License
 
 MIT License © Daniel Fernandes
-
----

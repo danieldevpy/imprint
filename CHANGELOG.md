@@ -1,48 +1,73 @@
 # Changelog
 
-## [0.1.3] - 2025-09-12
-### Added
-- Documentação atualizada em **Português (PT-BR)** e **English (EN)** (README completo, quickstart e guia de contribuição).
-- Exemplos prontos em `examples/` (ex.: geração de badge básico).
-- Suíte de testes automatizados (unittest/pytest) cobrindo `Model`, `Builder`, `engines/pillow` e `build_results`.
-- Instruções para execução de testes e sugestões para CI e `pytest.ini`.
+## \[0.1.4] - 2025-09-15
 
-### Changed
-- `Model._pages`: removido o default mutável; agora usa `default_factory=dict` (ou equivalente) para evitar compartilhamento entre instâncias.
-- `Model.get_form()`: iteração corrigida para iterar objetos `Page` / seus campos (em vez de iterar chaves do dict).
-- `Builder`: melhoria nas mensagens de erro e integração mais clara com engines (melhor tratamento de retorno de `engine.build_result()`).
-- `BuildResult`: comportamento de `to_bytes()` documentado/clarificado; `save()` melhor tratado para caminhos de ficheiro x diretórios e para múltiplas páginas.
+### Added
+
+* Introduced `BuilderMixin` to separate rendering logic from the Model.
+* Added `build_img(forms)` method to generate images using `PillowMotor`.
+* Added `build_pdf()` and `build_gif()` placeholder methods for future PDF/GIF generation.
+* Added `ImageBuild` for handling multiple images:
+  * `to_images()` → returns a list of PIL images.
+  * `to_image()` → returns a single image, raises error if multiple exist.
+  * `to_bytes(page=None)` → convert images to bytes.
+  * `save(path)` → save images to PNG or PDF depending on path.
+  * `show(page=None)` → preview images in default web browser.
+* Enhanced `Page` with methods to set width, height, dimension, and background.
+* Enhanced `Component` layer with robust getters and setters for `Text` and `Img`.
+* Added `get_component(name)` factory function and `COMPONENTS` type alias.
+* `Model` now separates page and field logic from rendering; `.render()` is deprecated in favor of `BuilderMixin` methods.
+* Added JSON persistence methods: `export(path)` and `load(path)`.
 
 ### Fixed
-- Engine Pillow:
-  - Abre imagens com `Image.open(...).convert("RGBA")` para garantir modos consistentes.
-  - Usa `paste(..., mask=...)` quando necessário para preservar canal alfa/transparência.
-  - Fallback para fonte corrigido (não usar `ImageFont.load_default(size=...)`, garantir fallback válido).
-- Evitar exceções com mensagens vazias; mensagens de erro agora são descritivas.
-- Correções diversas de robustez (validações de dimensão/background em `PillowMotor.new_page`, tratamento de entradas vazias em `ImageBuildResult`).
+
+* Fixed internal handling of multiple pages when generating images.
+* Improved validation in component setters (`Text` and `Img`).
+* Ensured `_make()` correctly maps form values to fields and handles missing keys with errors.
+
+## [0.1.3] - 2025-09-12
+### Added
+- Documentation updated in **Portuguese (PT-BR)** and **English (EN)** (full README, quickstart, and contribution guide).
+- Ready-to-use examples in `examples/` (e.g., basic badge generation).
+- Automated test suite (unittest/pytest) covering `Model`, `Builder`, `engines/pillow`, and `build_results`.
+- Instructions for running tests and suggestions for CI and `pytest.ini`.
+
+### Changed
+- `Model._pages`: removed mutable default; now uses `default_factory=dict` (or equivalent) to avoid sharing between instances.
+- `Model.get_form()`: iteration fixed to loop over `Page` objects / their fields (instead of iterating dict keys).
+- `Builder`: improved error messages and clearer integration with engines (better handling of `engine.build_result()` return).
+- `BuildResult`: behavior of `to_bytes()` documented/clarified; `save()` improved for file paths vs directories and multi-page handling.
+
+### Fixed
+- Pillow Engine:
+  - Opens images with `Image.open(...).convert("RGBA")` to ensure consistent modes.
+  - Uses `paste(..., mask=...)` when needed to preserve alpha/transparency.
+  - Font fallback fixed (do not use `ImageFont.load_default(size=...)`; ensure valid fallback).
+- Avoid exceptions with empty messages; error messages are now descriptive.
+- Various robustness fixes (dimension/background validation in `PillowMotor.new_page`, handling empty inputs in `ImageBuildResult`).
 
 ### Documentation & Tests
-- README bilíngue (PT/EN) com quickstart, API summary e boas práticas.
-- Testes adicionados com instruções de execução (`pytest` / `python -m unittest`).
-- Exemplos que demonstram `render().show()`, `save()` (arquivo e diretório) e exportação multi-página.
+- Bilingual README (PT/EN) with quickstart, API summary, and best practices.
+- Tests added with execution instructions (`pytest` / `python -m unittest`).
+- Examples demonstrating `render().show()`, `save()` (file and directory), and multi-page export.
 
 ### Notes
-- Não são esperadas breaking changes para usuários finais; algumas melhorias internas podem afetar serialização/instâncias se você dependia de `_pages` como atributo mutável por referência.
+- No breaking changes expected for end-users; some internal improvements may affect serialization/instances if you relied on `_pages` as a mutable reference attribute.
 
 ## [0.1.2] - 2025-09-11
 ### Fixed
-- Fixando bugs
+- Bug fixes
 
 ## [0.1.1] - 2025-09-11
 ### Added
-- Ajuste ao buildar um formulário a partir do modelo
-- Builder podendo construir images com pillow ou pdf com reportlib
-- Adicionado `CHANGELOG.md`.
+- Adjustment when building a form from the model
+- Builder capable of creating images with Pillow or PDFs with ReportLib
+- Added `CHANGELOG.md`.
 
 ### Fixed
-- Correção no get e setter dos componentes
-- Mudança de add_field para add_component
+- Fix in component getters and setters
+- Renamed `add_field` to `add_component`
 
 ## [0.1.0] - 2025-09-10
 ### Added
-- Primeira versão publicada da lib.
+- First published version of the library.

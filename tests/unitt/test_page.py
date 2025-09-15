@@ -10,7 +10,7 @@ def test_page():
     assert page.options.height == 0
     assert page.options.background == None
     assert page.options.background_color == (0, 0, 0, 0)
-    assert len(page._fields) == 0
+    assert len(page.fields) == 0
 
 
 def test_page_f_component():
